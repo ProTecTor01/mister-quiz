@@ -13,5 +13,18 @@
         </div>
         @endforeach
     </div>
+    <section class="answers-review" aria-labelledby="answers-title">
+        <h2 id="answers-title">Correct answers</h2>
+        <ol>
+            @foreach ($questions as $question)
+            <li>
+                <p class="review-question">{{ $question->question }}</p>
+                @foreach ($question->answers as $answer)
+                <p class="review-answer">{{ $answer->answer }}</p>
+                @endforeach
+            </li>
+            @endforeach
+        </ol>
+    </section>
 </main>
 @endsection

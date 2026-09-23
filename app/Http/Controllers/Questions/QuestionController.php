@@ -96,6 +96,13 @@ class QuestionController extends Controller
     {
         abort_unless($quiz->user_id === $request->user()->id, 403);
         abort_unless($quiz->completed, 404);
-        return view('questions.results', ['results' => $quiz->results]);
+        $quiz->load(['questions.answers' => function ($query) {
+            $query->where('correct', true);
+        }]);
+
+        return view('questions.results', [
+            'results' => $quiz->results,
+            'questions' => $quiz->questions,
+        ]);
     }
 }

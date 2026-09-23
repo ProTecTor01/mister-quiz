@@ -60,6 +60,7 @@ class QuizAuditTest extends TestCase
 
         $this->post('/quiz/' . $quiz->id, ['answers' => []])->assertSessionHasErrors('answers');
         $this->assertFalse($quiz->fresh()->completed);
+        $this->get('/quiz/' . $quiz->id . '/results')->assertNotFound();
 
         $answers = [];
         $expectedXp = 0;
@@ -74,7 +75,12 @@ class QuizAuditTest extends TestCase
 
         $this->post('/quiz/' . $quiz->id, ['answers' => $answers])
             ->assertRedirect('/quiz/' . $quiz->id . '/results');
-        $this->get('/quiz/' . $quiz->id . '/results')->assertOk()->assertSee('20 / 20 correct');
+        $results = $this->get('/quiz/' . $quiz->id . '/results')
+            ->assertOk()->assertSee('20 / 20 correct')->assertSee('Correct answers');
+        foreach ($quiz->questions as $question) {
+            $results->assertSeeText($question->question)
+                ->assertSeeText($question->answers()->where('correct', true)->firstOrFail()->answer);
+        }
         $this->assertSame($expectedXp, $user->fresh()->xp);
         foreach (['art', 'history', 'geography', 'science', 'sports'] as $category) {
             $this->assertSame('4/4', $user->fresh()->$category);
